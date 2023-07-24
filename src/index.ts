@@ -1,3 +1,4 @@
+import { closeDropdown } from '@finsweet/ts-utils';
 // Define types to represent the data we'll be working with
 
 /**
@@ -94,18 +95,19 @@ let selectedCountryNode: HTMLAnchorElement | null = null;
  * @function fetchCountries
  * @returns {Promise<Country[]>} - Promise object represents the countries fetched from the REST countries api.
  */
-const fetchRestCountries = async () => {
+const fetchRestCountries = async (): Promise<Country[]> => {
   const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,idd,flags');
   const data = await response.json();
 
-  return data;
+  //sort countries alphabetically by alpha 2 code
+  return data.sort((a: Country, b: Country) => (a.cca2 > b.cca2 ? 1 : -1));
 };
 
 /**
  * Fetch user info based on ip from ipapi.co and return the country code.
  * @returns {Promise<string>} - Promise object represents the country code of the current user.
  */
-const fetchUserLocation = async () => {
+const fetchUserLocation = async (): Promise<string> => {
   const response = await fetch('https://ipapi.co/json/');
   const data = await response.json();
 
@@ -123,6 +125,16 @@ const setSelectedCountry = (
   countries: Country[],
   countryCode: string
 ) => {
+  // Remove the current selected country
+  if (selectedCountryNode) {
+    selectedCountryNode.classList.remove('w--current');
+    selectedCountryNode.setAttribute('aria-selected', 'false');
+    selectedCountryNode.setAttribute('tabindex', '-1');
+  }
+
+  // Set the selected country
+  selectedCountryNode = dropdownListItem;
+
   // Set current user country as selected
   selectedCountry = countries.find((country: Country) => country.cca2 === countryCode) as Country;
 
@@ -137,6 +149,9 @@ const setSelectedCountry = (
   dropdownToggleFlag.src = selectedCountry?.flags.svg;
   dropdownToggleFlag.alt = selectedCountry?.name.official;
   dropdownTogglePrefix.textContent = `${selectedCountry?.idd?.root}${selectedCountry?.idd?.suffixes[0]}`;
+
+  // focus the dropdown item
+  setFocused();
 };
 
 const setFocused = () => {
@@ -147,46 +162,49 @@ const setFocused = () => {
   selectedCountryNode.setAttribute('tabindex', '0');
 };
 
-/**
- * Handle the arrow keydown event.
- * Move the focus to the next country in the dropdown list.
- */
-const handleArrowKeydown = (e: KeyboardEvent) => {
-  if (!selectedCountryNode) return;
+const getFocusedItem = (dropdownList: HTMLDivElement): HTMLAnchorElement | null => {
+  const focusedItem = document.activeElement as HTMLElement;
 
-  const dropdownList: HTMLDivElement | null = document.querySelector(
-    SELECTORS.dropdownList
-  ) as HTMLDivElement;
-
-  const dropdownListItems: NodeListOf<HTMLAnchorElement> | null = document.querySelectorAll(
-    SELECTORS.dropdownListItem
-  );
-
-  const dropdownListItemsArray = Array.from(dropdownListItems as NodeListOf<HTMLAnchorElement>);
-  const selectedCountryIndex = dropdownListItemsArray.indexOf(selectedCountryNode);
-
-  if (e.key === 'ArrowDown') {
-    if (selectedCountryIndex === dropdownListItemsArray.length - 1) return;
-
-    selectedCountryNode.classList.remove('w--current');
-    selectedCountryNode.setAttribute('aria-selected', 'false');
-    selectedCountryNode.setAttribute('tabindex', '-1');
-
-    selectedCountryNode = dropdownListItemsArray[selectedCountryIndex + 1];
-
-    setFocused();
+  // if focused item is not a dropdown item
+  if (!focusedItem?.matches(SELECTORS.dropdownListItem) && focusedItem?.tagName !== 'A') {
+    // return first item in dropdown
+    return dropdownList.querySelector<HTMLAnchorElement>(SELECTORS.dropdownListItem);
   }
 
-  if (e.key === 'ArrowUp') {
-    if (selectedCountryIndex === 0) return;
+  return focusedItem as HTMLAnchorElement;
+};
 
-    selectedCountryNode.classList.remove('w--current');
-    selectedCountryNode.setAttribute('aria-selected', 'false');
-    selectedCountryNode.setAttribute('tabindex', '-1');
+/**
+ * Handle the arrow-down keydown event.
+ * Move the focus to the next country in the dropdown list.
+ */
+const handleArrowdownKeydown = (dropdownList: HTMLDivElement | null) => {
+  if (!dropdownList) return;
 
-    selectedCountryNode = dropdownListItemsArray[selectedCountryIndex - 1];
+  const focusedItem = getFocusedItem(dropdownList);
 
-    setFocused();
+  if (!focusedItem) return;
+
+  const nextItem = focusedItem.nextElementSibling as HTMLAnchorElement | null;
+  if (nextItem) {
+    nextItem.focus();
+  }
+};
+
+/**
+ * Handle the arrow-up keydown event.
+ * Move the focus to the previous country in the dropdown list.
+ */
+const handleArrowupKeydown = (dropdownList: HTMLDivElement | null) => {
+  if (!dropdownList) return;
+
+  const focusedItem = getFocusedItem(dropdownList);
+
+  if (!focusedItem) return;
+
+  const prevItem = focusedItem.previousElementSibling as HTMLAnchorElement | null;
+  if (prevItem) {
+    prevItem.focus();
   }
 };
 
@@ -224,6 +242,9 @@ const fillDropdown = (
     // onclick event listener
     dropdownListItemClone.addEventListener('click', () => {
       setSelectedCountry(dropdownListItemClone, countries, countryCode);
+
+      // hide dropdown
+      toggleDropdown();
     });
 
     // add the country to the dropdown
@@ -240,6 +261,27 @@ const fillDropdown = (
 
     dropdownList.append(dropdownListItemClone);
   });
+};
+
+const toggleDropdown = (show?: boolean) => {
+  const dropdown = document.querySelector<HTMLDivElement>(SELECTORS.dropdown);
+  const dropdownListWrapper = document.querySelector<HTMLDivElement>(SELECTORS.dropdownListWrapper);
+  const dropdownList = document.querySelector<HTMLDivElement>(SELECTORS.dropdownList);
+  const dropdownToggle = document.querySelector<HTMLDivElement>(SELECTORS.dropdownToggle);
+
+  if (!dropdown || !dropdownList || !dropdownListWrapper || !dropdownToggle) return;
+
+  if (!show) {
+    setFocused();
+  }
+
+  // todo: based on closeDropdown() in @finsweet/ts-utils
+  const event = show ? 'w-open' : 'w-close';
+  dropdownToggle.dispatchEvent(new Event(event, { bubbles: true }));
+};
+
+const watchDropdownEffects = () => {
+  console.log('watching dropdown effects...');
 };
 
 const initializeDropdown = async () => {
@@ -269,11 +311,49 @@ const initializeDropdown = async () => {
     dropdownList as HTMLDivElement
   );
 
-  watchDropdownEffects();
-};
+  dropdownList?.addEventListener('keydown', (e: KeyboardEvent) => {
+    const { key } = e;
 
-const watchDropdownEffects = () => {
-  console.log('watching dropdown effects...');
+    switch (key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        handleArrowdownKeydown(dropdownList);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        handleArrowupKeydown(dropdownList);
+        break;
+      case 'Enter':
+        // e.preventDefault();
+        // handleEnterKeydown(countries);
+        break;
+      default:
+        break;
+    }
+  });
+
+  dropdownToggle?.addEventListener('keydown', (e: KeyboardEvent) => {
+    const { key } = e;
+
+    switch (key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        toggleDropdown(true);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        toggleDropdown(true);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        toggleDropdown(true);
+        break;
+      default:
+        break;
+    }
+
+    watchDropdownEffects();
+  });
 };
 
 //initialize dropdown
