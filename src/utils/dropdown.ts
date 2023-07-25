@@ -130,8 +130,7 @@ export const searchCountry = (dropdownList: HTMLDivElement | null, searchQuery: 
   const listItems = dropdownList.querySelectorAll<HTMLAnchorElement>('.prefix-dropdown_item');
 
   // find all items that start with the search query and go to next when the same letter is pressed
-  for (let i = 0; i < listItems.length; i++) {
-    const item = listItems[i];
+  for (const item of listItems) {
     const label = item.querySelector<HTMLDivElement>('[data-element="value"]');
 
     if (!label) continue;
