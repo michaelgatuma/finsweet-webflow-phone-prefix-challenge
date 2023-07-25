@@ -24,6 +24,9 @@ export const setSelectedCountry = (
   countries: Country[],
   countryCode: string
 ) => {
+  const { inputCountryCode, dropdownToggleFlag, dropdownTogglePrefix } =
+    initializeHTMLFormElements();
+
   // Remove the current selected country
   if (selectedCountryNode) {
     selectedCountryNode.classList.remove('w--current');
@@ -37,21 +40,14 @@ export const setSelectedCountry = (
   // Set current user country as selected
   selectedCountry = countries.find((country: Country) => country.cca2 === countryCode) as Country;
 
-  // Set current user country flag and prefix
-  const dropdownToggleFlag: HTMLImageElement | null = document.querySelector(
-    '.prefix-dropdown_toggle .prefix-dropdown_flag'
-  ) as HTMLImageElement;
-  const dropdownTogglePrefix: HTMLDivElement | null = document.querySelector(
-    '.prefix-dropdown_toggle [data-element="value"]'
-  ) as HTMLDivElement;
+  if (!inputCountryCode || !dropdownToggleFlag || !dropdownTogglePrefix) return;
 
   dropdownToggleFlag.src = selectedCountry?.flags.svg;
   dropdownToggleFlag.alt = selectedCountry?.name.official;
   dropdownTogglePrefix.textContent = `${selectedCountry?.idd?.root}${selectedCountry?.idd?.suffixes[0]}`;
 
   // Update the hidden input field with the selected country code
-  const { inputCountryCode } = initializeHTMLFormElements();
-  if (inputCountryCode != null) inputCountryCode.value = countryCode;
+  inputCountryCode.value = countryCode;
 
   // Focus the dropdown item
   setFocused();
@@ -211,12 +207,8 @@ export const fillDropdown = (
  * @param {boolean} show - Whether to show or hide the dropdown.
  */
 export const toggleDropdown = (show?: boolean) => {
-  const dropdown = document.querySelector<HTMLDivElement>('[data-element="dropdown"]');
-  const dropdownListWrapper = document.querySelector<HTMLDivElement>(
-    '.prefix-dropdown_list-wrapper'
-  );
-  const dropdownList = document.querySelector<HTMLDivElement>('.prefix-dropdown_list');
-  const dropdownToggle = document.querySelector<HTMLDivElement>('.prefix-dropdown_toggle');
+  const { dropdown, dropdownList, dropdownListWrapper, dropdownToggle } =
+    initializeHTMLFormElements();
 
   if (!dropdown || !dropdownList || !dropdownListWrapper || !dropdownToggle) return;
 
