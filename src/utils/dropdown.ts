@@ -1,5 +1,6 @@
 import type { Country } from 'src/types';
 
+import { initializeHTMLFormElements } from './dom';
 /**
  * Represents the currently selected country.
  * @type {Country | null}
@@ -48,6 +49,10 @@ export const setSelectedCountry = (
   dropdownToggleFlag.alt = selectedCountry?.name.official;
   dropdownTogglePrefix.textContent = `${selectedCountry?.idd?.root}${selectedCountry?.idd?.suffixes[0]}`;
 
+  // Update the hidden input field with the selected country code
+  const { inputCountryCode } = initializeHTMLFormElements();
+  if (inputCountryCode != null) inputCountryCode.value = countryCode;
+
   // Focus the dropdown item
   setFocused();
 };
@@ -58,6 +63,7 @@ export const setSelectedCountry = (
 export const setFocused = () => {
   if (!selectedCountryNode) return;
 
+  // Add the "w--current" class and set attributes for "Current" state
   selectedCountryNode.classList.add('w--current');
   selectedCountryNode.setAttribute('aria-selected', 'true');
   selectedCountryNode.setAttribute('tabindex', '0');
