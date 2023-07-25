@@ -208,6 +208,25 @@ const handleArrowupKeydown = (dropdownList: HTMLDivElement | null) => {
   }
 };
 
+const searchCountry = (dropdownList: HTMLDivElement | null, searchQuery: string) => {
+  if (!dropdownList) return;
+  const items = dropdownList.querySelectorAll<HTMLAnchorElement>(SELECTORS.dropdownListItem);
+
+  // find all items that start with the search query and go to next when the same letter is pressed
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const label = item.querySelector<HTMLDivElement>(SELECTORS.dropdownListItemLabel);
+
+    if (!label) continue;
+
+    const labelText = label.textContent || '';
+
+    if (labelText.startsWith(searchQuery)) {
+      return item;
+    }
+  }
+};
+
 const fillDropdown = (
   countries: Country[],
   userCountryCode: string | null,
@@ -380,6 +399,15 @@ const initializeDropdown = async () => {
         // handleEnterKeydown(countries);
         break;
       default:
+        if (key.match(/^[a-z]$/i)) {
+          e.preventDefault();
+
+          const firstItemWithLetter = searchCountry(dropdownList, key.toUpperCase());
+
+          if (firstItemWithLetter) {
+            firstItemWithLetter.focus();
+          }
+        }
         break;
     }
   });
@@ -390,11 +418,11 @@ const initializeDropdown = async () => {
     switch (key) {
       case 'ArrowDown':
         e.preventDefault();
-        toggleDropdown(true);//todo: this is not working
+        toggleDropdown(true); //todo: this is not working
         break;
       case 'ArrowUp':
         e.preventDefault();
-        toggleDropdown(true);//todo: this is not working
+        toggleDropdown(true); //todo: this is not working
         break;
       default:
         break;
