@@ -4,27 +4,20 @@ import { fetchRestCountries, fetchUserLocation } from './api';
 import { initializeHTMLFormElements } from './dom';
 import {
   fillDropdown,
-  getFocusedItem,
   handleArrowdownKeydown,
   handleArrowupKeydown,
-  scrollToSelectedCountry,
   searchCountry,
-  setSelectedCountry,
   toggleDropdown,
   watchDropdownEffects,
 } from './dropdown';
 
-export const initializeEventListeners = async () => {
-  const {
-    dropdown,
-    dropdownList,
-    dropdownToggle,
-    inputPhone,
-    inputCountryCode,
-    submitBtn,
-    formSuccessFlash,
-    formErrorFlash,
-  } = initializeHTMLFormElements();
+/**
+ * Fetches countries from the API, fills the dropdown, and initializes event listeners.
+ * @async
+ * @returns {Promise<void>} - A promise that resolves when the initialization is complete.
+ */
+export const initializeEventListeners = async (): Promise<void> => {
+  const { dropdown, dropdownList, dropdownToggle } = initializeHTMLFormElements();
 
   // Fetch countries
   const countries: Country[] = await fetchRestCountries();
@@ -73,17 +66,18 @@ export const initializeEventListeners = async () => {
     switch (key) {
       case 'ArrowDown':
         e.preventDefault();
-        toggleDropdown(true);
+        toggleDropdown(true); // fix-me
         break;
       case 'ArrowUp':
         e.preventDefault();
-        toggleDropdown(true);
+        toggleDropdown(true); //fix-me
         break;
       default:
         break;
     }
   });
 
+  // Observe dropdown mutations and apply effects
   watchDropdownEffects(
     dropdownList as HTMLDivElement,
     dropdownList as HTMLDivElement,

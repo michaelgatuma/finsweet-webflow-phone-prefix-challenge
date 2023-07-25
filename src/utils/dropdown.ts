@@ -1,8 +1,23 @@
 import type { Country } from 'src/types';
 
+/**
+ * Represents the currently selected country.
+ * @type {Country | null}
+ */
 let selectedCountry: Country | null = null;
+
+/**
+ * Represents the currently selected country node in the dropdown.
+ * @type {HTMLAnchorElement | null}
+ */
 let selectedCountryNode: HTMLAnchorElement | null = null;
 
+/**
+ * Sets the selected country in the dropdown and updates the UI accordingly.
+ * @param {HTMLAnchorElement} dropdownListItem - The dropdown list item that was clicked.
+ * @param {Country[]} countries - The array of countries fetched from the REST countries API.
+ * @param {string} countryCode - The country code of the selected country.
+ */
 export const setSelectedCountry = (
   dropdownListItem: HTMLAnchorElement,
   countries: Country[],
@@ -33,10 +48,13 @@ export const setSelectedCountry = (
   dropdownToggleFlag.alt = selectedCountry?.name.official;
   dropdownTogglePrefix.textContent = `${selectedCountry?.idd?.root}${selectedCountry?.idd?.suffixes[0]}`;
 
-  // focus the dropdown item
+  // Focus the dropdown item
   setFocused();
 };
 
+/**
+ * Sets focus and attributes on the currently selected country node in the dropdown.
+ */
 export const setFocused = () => {
   if (!selectedCountryNode) return;
 
@@ -45,6 +63,12 @@ export const setFocused = () => {
   selectedCountryNode.setAttribute('tabindex', '0');
 };
 
+/**
+ * Gets the currently focused dropdown item within the dropdown list.
+ * If no item is focused, returns the first dropdown item by default.
+ * @param {HTMLDivElement} dropdownList - The dropdown list element containing the countries.
+ * @returns {HTMLAnchorElement | null} - The currently focused dropdown item or the first item if none is focused.
+ */
 export const getFocusedItem = (dropdownList: HTMLDivElement): HTMLAnchorElement | null => {
   const focusedItem = document.activeElement as HTMLElement;
 
@@ -57,6 +81,11 @@ export const getFocusedItem = (dropdownList: HTMLDivElement): HTMLAnchorElement 
   return focusedItem as HTMLAnchorElement;
 };
 
+/**
+ * Handles the arrow-down keydown event.
+ * Moves the focus to the next country in the dropdown list.
+ * @param {HTMLDivElement | null} dropdownList - The dropdown list element.
+ */
 export const handleArrowdownKeydown = (dropdownList: HTMLDivElement | null) => {
   if (!dropdownList) return;
 
@@ -70,6 +99,11 @@ export const handleArrowdownKeydown = (dropdownList: HTMLDivElement | null) => {
   }
 };
 
+/**
+ * Handles the arrow-up keydown event.
+ * Moves the focus to the previous country in the dropdown list.
+ * @param {HTMLDivElement | null} dropdownList - The dropdown list element.
+ */
 export const handleArrowupKeydown = (dropdownList: HTMLDivElement | null) => {
   if (!dropdownList) return;
 
@@ -83,13 +117,19 @@ export const handleArrowupKeydown = (dropdownList: HTMLDivElement | null) => {
   }
 };
 
+/**
+ * Searches for a country in the dropdown list based on a search query.
+ * @param dropdownList - The dropdown list element.
+ * @param searchQuery - The search query to match.
+ * @returns {HTMLAnchorElement | null} - The dropdown item that matches the search query.
+ */
 export const searchCountry = (dropdownList: HTMLDivElement | null, searchQuery: string) => {
   if (!dropdownList) return;
-  const items = dropdownList.querySelectorAll<HTMLAnchorElement>('.prefix-dropdown_item');
+  const listItems = dropdownList.querySelectorAll<HTMLAnchorElement>('.prefix-dropdown_item');
 
   // find all items that start with the search query and go to next when the same letter is pressed
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
+  for (let i = 0; i < listItems.length; i++) {
+    const item = listItems[i];
     const label = item.querySelector<HTMLDivElement>('[data-element="value"]');
 
     if (!label) continue;
@@ -102,6 +142,13 @@ export const searchCountry = (dropdownList: HTMLDivElement | null, searchQuery: 
   }
 };
 
+/**
+ * Populates the dropdown list with countries.
+ * @param {Country[]} countries - The array of countries fetched from the REST countries API.
+ * @param {string | null} userCountryCode - The country code of the current user.
+ * @param {HTMLDivElement} dropdown - The dropdown element.
+ * @param {HTMLDivElement} dropdownList - The dropdown list element.
+ */
 export const fillDropdown = (
   countries: Country[],
   userCountryCode: string | null,
@@ -153,6 +200,10 @@ export const fillDropdown = (
   });
 };
 
+/**
+ * Toggles the dropdown visibility.
+ * @param {boolean} show - Whether to show or hide the dropdown.
+ */
 export const toggleDropdown = (show?: boolean) => {
   const dropdown = document.querySelector<HTMLDivElement>('[data-element="dropdown"]');
   const dropdownListWrapper = document.querySelector<HTMLDivElement>(
@@ -172,6 +223,10 @@ export const toggleDropdown = (show?: boolean) => {
   dropdownToggle.dispatchEvent(new Event(event, { bubbles: true }));
 };
 
+/**
+ * Scrolls to the currently selected country in the dropdown list.
+ * @param {HTMLDivElement} dropdownList - The dropdown list element.
+ */
 export const scrollToSelectedCountry = (dropdownList: HTMLDivElement) => {
   if (!selectedCountryNode) {
     const firstItem = dropdownList.querySelector<HTMLAnchorElement>('.prefix-dropdown_item');
@@ -192,6 +247,14 @@ export const scrollToSelectedCountry = (dropdownList: HTMLDivElement) => {
   }, 100);
 };
 
+/**
+ * Watches for changes in the dropdown visibility and updates the UI accordingly.
+ * @param {HTMLDivElement} targetElement - The element to observe for changes.
+ * @param {HTMLDivElement} dropdownList - The dropdown list element.
+ * @param {HTMLDivElement} dropdownToggle - The dropdown toggle element.
+ * @returns {MutationObserver} - The observer instance.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+ */
 export const watchDropdownEffects = (
   targetElement: HTMLDivElement,
   dropdownList: HTMLDivElement,
