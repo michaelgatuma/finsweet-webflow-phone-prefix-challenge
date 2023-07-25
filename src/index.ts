@@ -280,8 +280,60 @@ const toggleDropdown = (show?: boolean) => {
   dropdownToggle.dispatchEvent(new Event(event, { bubbles: true }));
 };
 
-const watchDropdownEffects = () => {
-  console.log('watching dropdown effects...');
+/**
+ * Scrolls to the selected country in the dropdown list and sets focus on it.
+ * If no country is selected, it scrolls to and sets focus on the first country in the list.
+ * @param dropdownList - The dropdown list element containing the countries.
+ */
+const scrollToSelectedCountry = (dropdownList: HTMLDivElement) => {
+  if (!selectedCountryNode) {
+    const firstItem = dropdownList.querySelector<HTMLAnchorElement>(SELECTORS.dropdownListItem);
+
+    if (firstItem) {
+      setTimeout(() => {
+        firstItem.focus();
+      }, 100);
+    }
+
+    return;
+  }
+
+  selectedCountryNode?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+
+  setTimeout(() => {
+    selectedCountryNode?.focus();
+  }, 100);
+};
+
+const watchDropdownEffects = (
+  targetElement: HTMLDivElement,
+  dropdownList: HTMLDivElement,
+  dropdownToggle: HTMLDivElement
+) => {
+  // Create an observer instance linked to the callback function
+  const observer = new MutationObserver((mutationsList, observer) => {
+    // Use traditional 'for loops' for IE 11
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const isOpen = targetElement.classList.contains('w--open');
+
+        setFocused();
+
+        if (isOpen) {
+          scrollToSelectedCountry(dropdownList);
+          dropdownList.setAttribute('aria-hidden', 'false');
+          dropdownToggle.setAttribute('aria-expanded', 'true');
+        } else {
+          dropdownToggle.focus();
+          dropdownList.setAttribute('aria-hidden', 'true');
+          dropdownToggle.setAttribute('aria-expanded', 'false');
+        }
+      }
+    }
+  });
+
+  // Start observing the target node for configured mutations
+  observer.observe(targetElement, { attributes: true });
 };
 
 const initializeDropdown = async () => {
@@ -338,22 +390,24 @@ const initializeDropdown = async () => {
     switch (key) {
       case 'ArrowDown':
         e.preventDefault();
-        toggleDropdown(true);
+        toggleDropdown(true);//todo: this is not working
         break;
       case 'ArrowUp':
         e.preventDefault();
-        toggleDropdown(true);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        toggleDropdown(true);
+        toggleDropdown(true);//todo: this is not working
         break;
       default:
         break;
     }
-
-    watchDropdownEffects();
   });
+
+  watchDropdownEffects(
+    dropdownListWrapper as HTMLDivElement,
+    dropdownList as HTMLDivElement,
+    dropdownToggle as HTMLDivElement
+  );
+
+  dropdownToggle?.focus();
 };
 
 //initialize dropdown
