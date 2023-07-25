@@ -1,3 +1,4 @@
+import { closeDropdown } from '@finsweet/ts-utils';
 import type { Country } from 'src/types';
 
 import { fetchRestCountries, fetchUserLocation } from './api';
@@ -7,7 +8,6 @@ import {
   handleArrowdownKeydown,
   handleArrowupKeydown,
   searchCountry,
-  toggleDropdown,
   watchDropdownEffects,
 } from './dropdown';
 
@@ -27,9 +27,9 @@ export const initializeEventListeners = async (): Promise<void> => {
   const userCountryCode = await fetchUserLocation();
 
   // Fill dropdown with countries
-  if (dropdown !== null && dropdownList !== null) {
-    fillDropdown(countries, userCountryCode, dropdown, dropdownList);
-  }
+  if (!dropdown || !dropdownList || !dropdownToggle) return;
+
+  fillDropdown(countries, userCountryCode, dropdown, dropdownList, dropdownToggle);
 
   // Handle dropdownList Keydown event to navigate dropdown items
   dropdownList?.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -44,9 +44,8 @@ export const initializeEventListeners = async (): Promise<void> => {
         e.preventDefault();
         handleArrowupKeydown(dropdownList);
         break;
-      case 'Enter':
-        // e.preventDefault();
-        // handleEnterKeydown(countries);
+      case 'Tab':
+        closeDropdown(dropdownToggle);
         break;
       default:
         if (key.match(/^[a-z]$/i)) {
@@ -62,33 +61,10 @@ export const initializeEventListeners = async (): Promise<void> => {
     }
   });
 
-  // Handle dropdownToggle Keydown event to toggle dropdown visibility and navigate dropdown items
-  dropdownToggle?.addEventListener('keydown', (e: KeyboardEvent) => {
-    const { key } = e;
-
-    switch (key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        toggleDropdown(true); // fix-me
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        toggleDropdown(true); //fix-me
-        break;
-      default:
-        break;
-    }
-  });
+  if (!dropdownToggle || !dropdownList || !dropdownListWrapper) return;
 
   // Observe dropdown mutations and apply effects
-  watchDropdownEffects(
-    dropdownListWrapper as HTMLDivElement,
-    dropdownList as HTMLDivElement,
-    dropdownToggle as HTMLDivElement
-  );
+  watchDropdownEffects(dropdownListWrapper, dropdownList, dropdownToggle);
 
   dropdownToggle?.focus();
 };
-
-//initialize event listeners
-document.addEventListener('DOMContentLoaded', initializeEventListeners);

@@ -1,3 +1,4 @@
+import { closeDropdown } from '@finsweet/ts-utils';
 import type { Country } from 'src/types';
 
 import { initializeHTMLFormElements } from './dom';
@@ -154,11 +155,16 @@ export const fillDropdown = (
   countries: Country[],
   userCountryCode: string | null,
   dropdown: HTMLDivElement,
-  dropdownList: HTMLDivElement
+  dropdownList: HTMLDivElement,
+  dropdownToggle: HTMLDivElement
 ) => {
   const template = dropdown.querySelector<HTMLAnchorElement>('.prefix-dropdown_item');
 
   if (!template) return;
+
+  template.classList.remove('w--current');
+  template.setAttribute('aria-selected', 'false');
+  template.setAttribute('tabindex', '-1');
 
   // remove the template from the DOM
   template.remove();
@@ -182,7 +188,7 @@ export const fillDropdown = (
       setSelectedCountry(dropdownListItemClone, countries, countryCode);
 
       // hide dropdown
-      toggleDropdown();
+      toggleDropdown(dropdownToggle);
     });
 
     // add the country to the dropdown
@@ -205,19 +211,12 @@ export const fillDropdown = (
  * Toggles the dropdown visibility.
  * @param {boolean} show - Whether to show or hide the dropdown.
  */
-export const toggleDropdown = (show?: boolean) => {
-  const { dropdown, dropdownList, dropdownListWrapper, dropdownToggle } =
-    initializeHTMLFormElements();
-
-  if (!dropdown || !dropdownList || !dropdownListWrapper || !dropdownToggle) return;
-
+export const toggleDropdown = (dropdownToggle: HTMLDivElement, show?: boolean) => {
   if (!show) {
     setFocused();
   }
 
-  // todo: based on closeDropdown() in @finsweet/ts-utils
-  const event = show ? 'w-open' : 'w-close';
-  dropdownToggle.dispatchEvent(new Event(event, { bubbles: true }));
+  closeDropdown(dropdownToggle);
 };
 
 /**
@@ -258,7 +257,7 @@ export const watchDropdownEffects = (
   dropdownToggle: HTMLDivElement
 ) => {
   // Create an observer instance linked to the callback function
-  const observer = new MutationObserver((mutationsList, observer) => {
+  const observer = new MutationObserver((mutationsList) => {
     // Use traditional 'for loops' for IE 11
     for (const mutation of mutationsList) {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
