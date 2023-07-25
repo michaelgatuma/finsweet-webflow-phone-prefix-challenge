@@ -1,3 +1,26 @@
+/**
+ * Represents various HTML elements
+ * @interface DOM
+ */
+export interface DOM {
+  form: HTMLFormElement | null;
+  dropdown: HTMLDivElement | null;
+  dropdownToggle: HTMLDivElement | null;
+  dropdownToggleFlag: HTMLImageElement | null;
+  dropdownTogglePrefix: HTMLDivElement | null;
+  dropdownListWrapper: HTMLDivElement | null;
+  dropdownList: HTMLDivElement | null;
+  inputPhone: HTMLInputElement | null;
+  inputCountryCode: HTMLInputElement | null;
+  submitBtn: HTMLButtonElement | null;
+  formSuccessFlash: HTMLDivElement | null;
+  formErrorFlash: HTMLDivElement | null;
+}
+
+/**
+ * Represents the data structure of a country.
+ * @interface Country
+ */
 export interface Country {
   /** official name of the country. */
   name: {

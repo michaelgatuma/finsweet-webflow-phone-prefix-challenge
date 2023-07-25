@@ -1,9 +1,11 @@
-export const initializeHTMLFormElements = () => {
+import type { DOM } from 'src/types';
+
 /**
  * Initializes and retrieves various HTML form elements used in the phone form.
  * @function initializeHTMLFormElements
  * @returns {DOM} - An object containing various HTML form elements.
  */
+export const initializeHTMLFormElements = (): DOM => {
   const form = document.querySelector<HTMLFormElement>('.phone-form_form');
   const dropdown = document.querySelector<HTMLDivElement>('[data-element="dropdown"]');
   const dropdownToggle = document.querySelector<HTMLDivElement>('.prefix-dropdown_toggle');

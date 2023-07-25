@@ -1,4 +1,4 @@
-import type { Country } from 'src/types';
+import type { Country, IPAddressInfo } from 'src/types';
 
 /**
  * Fetches countries from the REST countries API and sorts them alphabetically by alpha 2 code.
@@ -22,7 +22,7 @@ export const fetchRestCountries = async (): Promise<Country[]> => {
  */
 export const fetchUserLocation = async (): Promise<string> => {
   const response = await fetch('https://ipapi.co/json/');
-  const data = await response.json();
+  const data: IPAddressInfo = await response.json();
 
   return data?.country_code || 'KE';
 };
