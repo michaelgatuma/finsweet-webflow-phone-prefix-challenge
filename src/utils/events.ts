@@ -17,7 +17,8 @@ import {
  * @returns {Promise<void>} - A promise that resolves when the initialization is complete.
  */
 export const initializeEventListeners = async (): Promise<void> => {
-  const { dropdown, dropdownList, dropdownToggle } = initializeHTMLFormElements();
+  const { dropdown, dropdownList, dropdownListWrapper, dropdownToggle } =
+    initializeHTMLFormElements();
 
   // Fetch countries
   const countries: Country[] = await fetchRestCountries();
@@ -30,6 +31,7 @@ export const initializeEventListeners = async (): Promise<void> => {
     fillDropdown(countries, userCountryCode, dropdown, dropdownList);
   }
 
+  // Handle dropdownList Keydown event to navigate dropdown items
   dropdownList?.addEventListener('keydown', (e: KeyboardEvent) => {
     const { key } = e;
 
@@ -60,6 +62,7 @@ export const initializeEventListeners = async (): Promise<void> => {
     }
   });
 
+  // Handle dropdownToggle Keydown event to toggle dropdown visibility and navigate dropdown items
   dropdownToggle?.addEventListener('keydown', (e: KeyboardEvent) => {
     const { key } = e;
 
@@ -79,7 +82,7 @@ export const initializeEventListeners = async (): Promise<void> => {
 
   // Observe dropdown mutations and apply effects
   watchDropdownEffects(
-    dropdownList as HTMLDivElement,
+    dropdownListWrapper as HTMLDivElement,
     dropdownList as HTMLDivElement,
     dropdownToggle as HTMLDivElement
   );
